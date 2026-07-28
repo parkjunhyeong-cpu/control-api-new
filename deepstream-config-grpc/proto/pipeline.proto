@@ -1,50 +1,44 @@
 syntax = "proto3";
-package serdic.pipeline.v1;
 
-service PipelineGateway {
-  rpc Connect(stream UpMessage) returns (stream DownMessage);
-}
+package deepstream;
 
-message UpMessage {
-  string tenant_id = 1;
-  oneof payload {
-    AlertBatch   alert_batch  = 2;
-    HealthReport health       = 3;
-    PpeViolation ppe          = 4;
-    bytes        recon        = 5;
-    bytes        volume       = 6;
-    bytes        benchmark    = 7;
-    ScanResult   scan_result  = 8;
-    bytes        sensor_event = 9;
-    OrderCreate  order_create = 10;
-  }
+// control-api는 별도 컨테이너에서 뜨는 설정 저장소 서버다. deepstream 파이프라인은 클라이언트로서
+// 시작 시 GetConfig로 초기 설정을 받고, WatchConfig로 이후 변경을 구독한다 (server-streaming RPC —
+// 클라이언트가 한 번 요청하면 서버가 여러 응답을 계속 흘려보낸다).
+service ControlApi {
+  rpc SetConfig(SetConfigRequest) returns (SetConfigResponse);
+  rpc GetConfig(GetConfigRequest) returns (GetConfigResponse);
+  rpc WatchConfig(WatchConfigRequest) returns (stream GetConfigResponse);
 }
 
-message DownMessage {
-  oneof payload {
-    bytes        config        = 1;   // msgpack(config object)
-    ScanCommand  scan_cmd      = 2;
-    BenchmarkCmd benchmark_cmd = 3;
-  }
+message Source {
+  string name = 1;
+  string url = 2;
+  int32 source_width = 3;
+  int32 source_height = 4;
 }
 
-message AlertBatch { repeated AlertEvent events = 1; }
-message AlertEvent {
-  string type = 1; string camera_name = 2; string krName = 3;
-  int32 src = 4; string verdict = 5; string item = 6;
-  repeated string missing = 7;
+message InputConfig {
+  repeated Source sources = 1;
+  int32 resize_width = 2;
+  int32 resize_height = 3;
+  int32 framerate_target = 4;
+  int32 reconnect_sec = 5;
 }
-message HealthReport { int64 last_frame = 1; repeated SourceHealth sources = 2; }
-message SourceHealth { string name = 1; bool active = 2; }
-message PpeViolation {
-  string camera_name = 1; int32 source_id = 2; string object_id = 3;
-  repeated string missing = 4; string timestamp = 5;
+
+message SetConfigRequest {
+  InputConfig input = 1;
 }
-message ScanCommand  { string request_id = 1; string subnet = 2; }
-message BenchmarkCmd { string action = 1; string model = 2; }
-message ScanResult   { string request_id = 1; bytes data = 2; }
-message CamMask      { string camera_name = 1; string mask_polygon = 2; }
-message OrderCreate {
-  string global_id = 1; string label = 2;
-  repeated float world_centroid = 3; repeated CamMask masks = 4;
+
+message SetConfigResponse {
+  bool ok = 1;
+  string message = 2;
 }
+
+message GetConfigRequest {}
+
+message GetConfigResponse {
+  InputConfig input = 1;
+}
+
+message WatchConfigRequest {}
