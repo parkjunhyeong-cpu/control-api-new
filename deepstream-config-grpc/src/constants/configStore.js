@@ -14,10 +14,16 @@ const DEFAULT_INPUT_CONFIG = {
 let currentConfig = DEFAULT_INPUT_CONFIG;
 
 export function getConfig() {
-  throw new Error("getConfig() not implemented");
+  return currentConfig;
 }
 
 export function setConfig(inputConfig) {
-  // TODO: 유효성 검증 후 currentConfig 갱신, 변경 여부 반환
-  throw new Error("setConfig() not implemented");
+  if (!inputConfig) {
+    throw new Error("input config required");
+  }
+  // DB의 findOneAndUpdate(upsert, full replace) 와 동일한 의미 — 부분 patch 가 아니라
+  // 문서 전체를 교체한다. proto3 는 미설정 필드가 zero-value 로 오므로 merge 하면
+  // "명시적 0" 과 "안 보냄" 을 구분할 수 없어 오히려 DB 시맨틱과 어긋난다.
+  currentConfig = inputConfig;
+  return currentConfig;
 }
