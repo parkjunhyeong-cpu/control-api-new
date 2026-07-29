@@ -11,6 +11,14 @@ const DEFAULT_CONFIG = {
         source_width: 1280,
         source_height: 720,
       },
+      // 두 번째 카메라. tiler 격자는 pipeline 쪽 compute_derived()가 소스 개수로 자동 계산한다
+      // (2개 -> 2열 1행 = 가로 배치) — 여기서는 url만 실제 두 번째 카메라 주소로 바꾸면 된다.
+      {
+        name: "ch01",
+        url: "rtsp://localhost:8554/stream1",
+        source_width: 1280,
+        source_height: 720,
+      },
     ],
     resize: { width: 960, height: 540 },
     framerate: { target: 20 },
@@ -25,8 +33,11 @@ const DEFAULT_CONFIG = {
         infer_dim: 640,
         labels: ["forklift"],
       },
+      // 사람 추론 중단 요청 — 삭제 대신 enabled=false로 끈다. _build_pgies()가 이 값을
+      // 보고 person PGIE를 아예 안 만들어 체인에서 빠진다(코드 변경 없이 바로 반영).
+      // zone probe도 person PGIE가 없으면 침입 감지는 자동으로 건너뛰고 forklift 원만 그린다.
       person: {
-        enabled: true,
+        enabled: false,
         config: "configs/pgie_person.txt",
         infer_dim: 640,
         labels: ["person"],
