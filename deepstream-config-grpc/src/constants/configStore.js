@@ -25,6 +25,12 @@ const DEFAULT_CONFIG = {
         infer_dim: 640,
         labels: ["forklift"],
       },
+      person: {
+        enabled: true,
+        config: "configs/pgie_person.txt",
+        infer_dim: 640,
+        labels: ["person"],
+      },
     },
     tracker: {
       config: "configs/tracker.yml",
