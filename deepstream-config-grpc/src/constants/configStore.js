@@ -63,11 +63,8 @@ const DEFAULT_CONFIG = {
         infer_dim: 640,
         labels: ["forklift"],
       },
-      // 사람 추론 중단 요청 — 삭제 대신 enabled=false로 끈다. _build_pgies()가 이 값을
-      // 보고 person PGIE를 아예 안 만들어 체인에서 빠진다(코드 변경 없이 바로 반영).
-      // zone probe도 person PGIE가 없으면 침입 감지는 자동으로 건너뛰고 forklift 원만 그린다.
       person: {
-        enabled: false,
+        enabled: true,
         config: "configs/pgie_person.txt",
         infer_dim: 640,
         labels: ["person"],
